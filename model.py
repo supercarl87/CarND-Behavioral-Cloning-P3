@@ -82,12 +82,13 @@ def main():
         ("data/driving_log.csv", 'data'),
         ("collected_data/driving_log.csv", ''),
         ("curve_saver/driving_log.csv", ''),
-        ("reverse_lane/driving_log.csv", '')
+        ("reverse_lane/driving_log.csv", ''),
+        ("low_resolution/driving_log.csv", '')
     ]
     data_entry_list = read_csv_info(input_path_tuples)
 
     # data_entry_list = data_entry_list[:1000]
-
+    data_entry_list = sklearn.utils.shuffle(data_entry_list)
     train_samples, validation_samples = train_test_split(data_entry_list, test_size=0.2)
 
     train_generator = generator(train_samples, batch_size=32, is_training=True)
@@ -99,17 +100,21 @@ def main():
     model = Sequential()
     model.add(Lambda(lambda x: x / 255.0 - 0.5, input_shape=input_shape))
     model.add(Cropping2D(cropping=((50, 20), (0, 0))))
-    model.add(Convolution2D(24, 5, 5, activation='relu'))
+    model.add(Convolution2D(48, 5, 5, activation='relu'))
     model.add(MaxPooling2D((2, 2)))
-    model.add(Convolution2D(16, 3, 3, activation='relu'))
+    model.add(Convolution2D(32, 5, 5, activation='relu'))
     model.add(MaxPooling2D((2, 2)))
-    model.add(Convolution2D(16, 3, 3, activation='relu'))
+    model.add(Convolution2D(64, 3, 3, activation='relu'))
+    model.add(MaxPooling2D((2, 2)))
+    model.add(Convolution2D(64, 3, 3, activation='relu'))
     model.add(MaxPooling2D((2, 2)))
     model.add(Flatten())
     model.add(Dropout(0.5))
-    model.add(Dense(128, activation='relu'))
+    model.add(Dense(100, activation='relu'))
     model.add(Dropout(0.5))
-    model.add(Dense(32, activation='relu'))
+    model.add(Dense(50, activation='relu'))
+    model.add(Dropout(0.8))
+    model.add(Dense(10, activation='relu'))
     model.add(Dense(1))
     model.compile(loss='mse', optimizer='adam', lr=0.001)
 
