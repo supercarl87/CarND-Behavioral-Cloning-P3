@@ -79,11 +79,10 @@ def generator(samples, batch_size, is_training):
 
 def main():
     input_path_tuples = [
-        ("data/driving_log.csv", 'data')
-        ("collected_data/driving_log.csv", '')
-        ("curve_saver/driving_log.csv", '')
+        ("data/driving_log.csv", 'data'),
+        ("collected_data/driving_log.csv", ''),
+        ("curve_saver/driving_log.csv", ''),
         ("reverse_lane/driving_log.csv", '')
-
     ]
     data_entry_list = read_csv_info(input_path_tuples)
 
@@ -116,7 +115,7 @@ def main():
 
     # train model
     history_object = model.fit_generator(train_generator, samples_per_epoch=
-    len(train_samples) * 2, validation_data=validation_generator, nb_val_samples=len(validation_samples), nb_epoch=5)
+    len(train_samples) * 2, validation_data=validation_generator, nb_val_samples=len(validation_samples), nb_epoch=3)
     model.save('model.h5')
 
     print(history_object.history.keys())
