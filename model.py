@@ -127,7 +127,7 @@ def main():
 
     # train model
     history_object = model.fit_generator(train_generator, samples_per_epoch=
-    len(train_samples) , validation_data=validation_generator, nb_val_samples=len(validation_samples), nb_epoch=5)
+    len(train_samples) , validation_data=validation_generator, nb_val_samples=len(validation_samples), nb_epoch=10)
     model.save('model.h5')
 
     print(history_object.history.keys())
