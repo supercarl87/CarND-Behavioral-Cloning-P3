@@ -34,9 +34,9 @@ def read_csv_info(input_path_tuples):
                 if row[0] == 'center':
                     continue
                 data_entry = DataEntry(row)
-                data_entry.center = os.path.join(directory_path, data_entry.center)
-                data_entry.left = os.path.join(directory_path, data_entry.left)
-                data_entry.right = os.path.join(directory_path, data_entry.right)
+                data_entry.center = os.path.join(directory_path, data_entry.center.strip())
+                data_entry.left = os.path.join(directory_path, data_entry.left.strip())
+                data_entry.right = os.path.join(directory_path, data_entry.right.strip())
                 rows.append(data_entry)
     return rows
 
@@ -61,11 +61,22 @@ def generator(samples, batch_size, is_training):
             images = []
             angles = []
             for batch_sample in batch_samples:
+                correction = 0.2
                 name = batch_sample.center
                 center_image = cv2.imread(name)
                 center_angle = float(batch_sample.steering)
+
                 images.append(center_image)
                 angles.append(center_angle)
+                left_image = cv2.imread(batch_sample.left)
+                left_angle = center_angle + correction
+                images.append(left_image)
+                angles.append(left_angle)
+                right_image = cv2.imread(batch_sample.right)
+                right_angle = center_angle - correction
+
+                images.append(right_image)
+                angles.append(right_angle)
                 # If it is in training mode flip the image
                 if (is_training):
                     images.append(cv2.flip(center_image, 1))
@@ -74,6 +85,7 @@ def generator(samples, batch_size, is_training):
             # trim image to only see section with road
             x_data = np.array(images)
             y_data = np.array(angles)
+            # shapes = set([image.shape for image in images])
             yield sklearn.utils.shuffle(x_data, y_data)
 
 
@@ -83,6 +95,7 @@ def main():
         ("collected_data/driving_log.csv", ''),
         ("curve_saver/driving_log.csv", ''),
         ("reverse_lane/driving_log.csv", ''),
+        ("speicial_edge/driving_log.csv", ''),
         ("low_resolution/driving_log.csv", '')
     ]
     data_entry_list = read_csv_info(input_path_tuples)
@@ -92,8 +105,7 @@ def main():
     train_samples, validation_samples = train_test_split(data_entry_list, test_size=0.2)
 
     train_generator = generator(train_samples, batch_size=32, is_training=True)
-    validation_generator = generator(validation_samples, batch_size=32, is_training=False)
-
+    validation_generator = generator(validation_samples, batch_size=32, is_training=True)
 
     # define model
     input_shape = (160, 320, 3)
@@ -120,7 +132,7 @@ def main():
 
     # train model
     history_object = model.fit_generator(train_generator, samples_per_epoch=
-    len(train_samples) * 2, validation_data=validation_generator, nb_val_samples=len(validation_samples), nb_epoch=3)
+    len(train_samples) * 4, validation_data=validation_generator, nb_val_samples=len(validation_samples), nb_epoch=3)
     model.save('model.h5')
 
     print(history_object.history.keys())
