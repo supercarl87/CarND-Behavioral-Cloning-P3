@@ -61,20 +61,19 @@ def generator(samples, batch_size, is_training):
             images = []
             angles = []
             for batch_sample in batch_samples:
-                correction = 0.2
                 name = batch_sample.center
                 center_image = cv2.imread(name)
                 center_angle = float(batch_sample.steering)
 
                 images.append(center_image)
                 angles.append(center_angle)
+                correction = 0.2
                 left_image = cv2.imread(batch_sample.left)
                 left_angle = center_angle + correction
                 images.append(left_image)
                 angles.append(left_angle)
                 right_image = cv2.imread(batch_sample.right)
                 right_angle = center_angle - correction
-
                 images.append(right_image)
                 angles.append(right_angle)
                 # If it is in training mode flip the image
@@ -96,6 +95,8 @@ def main():
         ("curve_saver/driving_log.csv", ''),
         ("reverse_lane/driving_log.csv", ''),
         ("speicial_edge/driving_log.csv", ''),
+        ("right_turn/driving_log.csv", ''),
+        ("right_turn/driving_log.csv", ''),
         ("low_resolution/driving_log.csv", '')
     ]
     data_entry_list = read_csv_info(input_path_tuples)
@@ -110,7 +111,7 @@ def main():
     # define model
     input_shape = (160, 320, 3)
     model = Sequential()
-    model.add(Lambda(lambda x: x / 255.0 - 0.5, input_shape=input_shape))
+    model.add(Lambda(lambda x: (x -128) / 128.0, input_shape=input_shape))
     model.add(Cropping2D(cropping=((50, 20), (0, 0))))
     model.add(Convolution2D(48, 5, 5, activation='relu'))
     model.add(MaxPooling2D((2, 2)))
