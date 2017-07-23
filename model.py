@@ -96,7 +96,6 @@ def main():
         ("reverse_lane/driving_log.csv", ''),
         ("speicial_edge/driving_log.csv", ''),
         ("right_turn/driving_log.csv", ''),
-        ("right_turn/driving_log.csv", ''),
         ("low_resolution/driving_log.csv", '')
     ]
     data_entry_list = read_csv_info(input_path_tuples)
@@ -105,35 +104,30 @@ def main():
     data_entry_list = sklearn.utils.shuffle(data_entry_list)
     train_samples, validation_samples = train_test_split(data_entry_list, test_size=0.2)
 
-    train_generator = generator(train_samples, batch_size=32, is_training=True)
-    validation_generator = generator(validation_samples, batch_size=32, is_training=True)
+    train_generator = generator(train_samples, batch_size=128, is_training=True)
+    validation_generator = generator(validation_samples, batch_size=128, is_training=True)
 
     # define model
     input_shape = (160, 320, 3)
     model = Sequential()
     model.add(Lambda(lambda x: (x -128) / 128.0, input_shape=input_shape))
     model.add(Cropping2D(cropping=((50, 20), (0, 0))))
-    model.add(Convolution2D(48, 5, 5, activation='relu'))
-    model.add(MaxPooling2D((2, 2)))
-    model.add(Convolution2D(32, 5, 5, activation='relu'))
-    model.add(MaxPooling2D((2, 2)))
-    model.add(Convolution2D(64, 3, 3, activation='relu'))
-    model.add(MaxPooling2D((2, 2)))
-    model.add(Convolution2D(64, 3, 3, activation='relu'))
-    model.add(MaxPooling2D((2, 2)))
+    model.add(Convolution2D(24, 5, 5, border_mode='valid', subsample=(2, 2), activation='relu'))
+    model.add(Convolution2D(36, 5, 5, border_mode='valid', subsample=(2, 2), activation='relu'))
+    model.add(Convolution2D(48, 5, 5, border_mode='valid', subsample=(2, 2), activation='relu'))
+    model.add(Convolution2D(64, 3, 3, border_mode='valid', subsample=(1, 1), activation='relu'))
+    model.add(Convolution2D(64, 3, 3, border_mode='valid', subsample=(1, 1), activation='relu'))
     model.add(Flatten())
-    model.add(Dropout(0.5))
     model.add(Dense(100, activation='relu'))
-    model.add(Dropout(0.5))
     model.add(Dense(50, activation='relu'))
-    model.add(Dropout(0.8))
+    model.add(Dropout(0.5))
     model.add(Dense(10, activation='relu'))
     model.add(Dense(1))
     model.compile(loss='mse', optimizer='adam', lr=0.001)
 
     # train model
     history_object = model.fit_generator(train_generator, samples_per_epoch=
-    len(train_samples) * 4, validation_data=validation_generator, nb_val_samples=len(validation_samples), nb_epoch=3)
+    len(train_samples) * 2, validation_data=validation_generator, nb_val_samples=len(validation_samples), nb_epoch=3)
     model.save('model.h5')
 
     print(history_object.history.keys())
