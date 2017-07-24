@@ -10,6 +10,8 @@ from keras.layers.convolutional import Convolution2D
 from keras.models import Sequential
 from sklearn.model_selection import train_test_split
 from sklearn.utils import shuffle
+import random
+import matplotlib.image
 
 
 # center,left,right,steering,throttle,brake,speed
@@ -87,7 +89,15 @@ def generator(samples, batch_size, is_training):
             yield sklearn.utils.shuffle(x_data, y_data)
 
 
-def main():
+def show_random_flip_example():
+    data = get_data_entry_list()
+    sample = random.choice(data)
+    img = cv2.imread(sample.center)
+    matplotlib.image.imsave("images/image_original1.png", img)
+    matplotlib.image.imsave("images/image_flip1.png", cv2.flip(img, 1))
+
+
+def get_data_entry_list():
     input_path_tuples = [
         ("data/driving_log.csv", 'data'),
         ("collected_data/driving_log.csv", ''),
@@ -98,6 +108,12 @@ def main():
         ("low_resolution/driving_log.csv", '')
     ]
     data_entry_list = read_csv_info(input_path_tuples)
+    return data_entry_list
+
+
+def main():
+
+    data_entry_list = get_data_entry_list()
 
     # data_entry_list = data_entry_list[:1000]
     data_entry_list = sklearn.utils.shuffle(data_entry_list)
@@ -143,4 +159,5 @@ def main():
 
 
 if __name__ == '__main__':
+    # show_random_flip_example()
     main()

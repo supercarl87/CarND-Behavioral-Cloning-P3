@@ -104,8 +104,8 @@ Then I repeated this process on track two in order to get more data points.
 
 To augment the data sat, I also flipped images and angles thinking that this would ... For example, here is an image that has then been flipped:
 
-![alt text][image6]
-![alt text][image7]
+![image curve_saver](/images/image_original1.png)
+![image curve_saver](/images/image_flip1.png)
 
 After the collection process, I had 15905 entries, and 63620 number of data points. I then preprocessed this data by this architecture describe above.
 
